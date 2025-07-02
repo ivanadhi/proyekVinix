@@ -1,263 +1,384 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Analisis Tren Prodi</title>
+    <title>Dasbor Analisis Tren Prodi Universitas</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 24px; }
-        .container { max-width: 1200px; margin: auto; }
-        .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); padding: 24px; margin-bottom: 24px; }
-        h1, h2 { color: #1d2129; }
-        h1 { text-align: center; }
-        h2 { margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .file-upload-container { background-color: #e7f3ff; border: 2px dashed #1877f2; border-radius: 8px; padding: 25px; text-align: center; cursor: pointer; transition: background-color 0.3s; }
-        .file-upload-container:hover { background-color: #d0e7ff; }
-        #file-input { display: none; }
-        #file-name { margin-top: 10px; font-style: italic; color: #606770; }
-        .controls { display: flex; gap: 20px; margin-bottom: 20px; align-items: center; }
-        .controls label { font-weight: 600; }
-        .controls select { font-size: 1rem; padding: 8px; border-radius: 6px; border: 1px solid #ccc; flex-grow: 1; }
-        #table-container { 
-            max-height: 500px; /* Batas tinggi tabel */
-            overflow: auto; /* Memungkinkan scroll vertikal dan horizontal */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 24px;
         }
-        
-        #data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        #data-table th, #data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; white-space: nowrap; /* Mencegah teks turun baris */ }
-        #data-table th { background-color: #f5f6f7; position: sticky; top: 0; z-index: 1; }
-        #data-table tbody tr:hover { background-color: #f0f2f5; cursor: pointer; }
-        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-        #trend-chart-container p { text-align: center; color: #606770; font-size: 1.2rem; padding: 50px 20px; background: #f9f9f9; border-radius: 8px;}
-        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
 
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        h1,
+        h2 {
+            color: #1d2129;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .file-upload-container {
+            background-color: #e7f3ff;
+            border: 2px dashed #1877f2;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-upload-container:hover {
+            background-color: #d0e7ff;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        #file-name {
+            margin-top: 10px;
+            font-style: italic;
+            color: #606770;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .controls label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .controls select {
+            font-size: 1rem;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            flex-grow: 1;
+        }
+
+        .control-group {
+            flex-grow: 1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            min-width: 250px;
+        }
+
+        #table-container {
+            max-height: 500px;
+            overflow: auto;
+        }
+
+        #data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        #data-table th,
+        #data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        #data-table th {
+            background-color: #f5f6f7;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        #data-table tbody tr:hover {
+            background-color: #f0f2f5;
+            cursor: pointer;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: #606770;
+            font-size: 1.2rem;
+            padding: 50px 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>Dasbor Analisis Tren Prodi (2020-2024)</h1>
-
-    <div class="card">
-        <div class="file-upload-container" onclick="document.getElementById('file-input').click()">
-            <label for="file-input"><strong>Pilih File Excel</strong></label>
-            <input type="file" id="file-input" accept=".xlsx, .xls">
-            <div id="file-name">Belum ada file dipilih. Pastikan header Excel sudah dibuat menjadi 1 baris.</div>
+    <div class="container">
+        <h1>Dasbor Analisis Tren Prodi (2020-2024)</h1>
+        <div class="card">
+            <div class="file-upload-container" onclick="document.getElementById('file-input').click()"><label
+                    for="file-input"><strong>Pilih File Excel</strong></label><input type="file" id="file-input"
+                    accept=".xlsx, .xls">
+                <div id="file-name">Belum ada file dipilih. Pastikan header Excel sudah dibuat menjadi 1 baris.</div>
+            </div>
         </div>
-    </div>
-
-    <div class="card" id="table-card" style="display: none;">
-        <h2>Data Program Studi</h2>
-        <div class="controls">
-            <label for="ptn-filter">Pilih PTN:</label>
-            <select id="ptn-filter">
-                <option value="semua">Tampilkan Semua</option>
-            </select>
+        <div class="card" id="table-card" style="display: none;">
+            <h2>Data Program Studi</h2>
+            <div class="controls">
+                <div class="control-group"><label for="ptn-filter">Filter Tabel:</label><select id="ptn-filter">
+                        <option value="semua">Tampilkan Semua Universitas</option>
+                    </select></div>
+            </div>
+            <div id="table-container"></div>
         </div>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <div id="table-container"></div>
-    </div>
-    
-    <div class="card" id="main-dashboard" style="display: none;">
-
-        <div class="grid-2">
+        <div class="card" id="main-dashboard" style="display: none;">
             <div id="trend-chart-container">
-                <h2>Grafik Tren Prodi</h2>
-                <p id="chart-placeholder">Klik salah satu prodi di tabel untuk melihat trennya di sini</p>
+                <h2>Grafik Tren Prodi Individual</h2>
+                <p class="placeholder-text" id="chart-placeholder">Klik salah satu prodi di tabel untuk melihat trennya
+                    di sini</p>
                 <canvas id="trendChart" style="display: none;"></canvas>
             </div>
-            <div id="aggregate-chart-container">
-                <h2>Prodi per Jenjang</h2>
-                <canvas id="jenjangChart"></canvas>
+        </div>
+        <div class="card" id="prodi-comparison-card" style="display: none;">
+            <h2>Analisis Prodi per Universitas</h2>
+            <div class="controls">
+                <div class="control-group"><label for="prodi-chart-ptn-filter">Pilih Universitas:</label><select
+                        id="prodi-chart-ptn-filter">
+                        <option value="" disabled selected>-- Pilih Universitas --</option>
+                    </select></div>
+                <div class="control-group"><label for="metric-selector">Pilih Metrik:</label><select
+                        id="metric-selector">
+                        <option value="total_peminat">Total Peminat (2020-2024)</option>
+                        <option value="peminat_per_tahun">Peminat per Tahun</option>
+                        <option value="keketatan">Tingkat Keketatan</option>
+                    </select></div>
+                <div class="control-group" id="year-selector-container" style="display: none;"><label
+                        for="year-selector">Pilih Tahun:</label><select id="year-selector">
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                        <option>2020</option>
+                    </select></div>
             </div>
+            <p class="placeholder-text" id="prodi-chart-placeholder">Silakan pilih satu Universitas untuk melihat
+                perbandingan prodinya.</p><canvas id="prodiComparisonChart"></canvas>
+        </div>
+        <div class="card" id="univ-composition-card" style="display: none;">
+            <h2>Perbandingan Prodi tiap Universitas</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="univ-metric-selector">Pilih Indikator :</label>
+                    <select id="univ-metric-selector">
+                        <option value="peminat_per_tahun">Peminat per Tahun</option>
+                        <option value="total_peminat">Total Peminat (2020-2024)</option>
+                        <option value="keketatan">Tingkat Keketatan</option>
+                    </select>
+                </div>
+                <div class="control-group" id="univ-year-selector-container">
+                    <label for="univ-year-selector">Pilih Tahun:</label>
+                    <select id="univ-year-selector">
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                        <option>2020</option>
+                    </select>
+                </div>
+            </div>
+            <canvas id="universityComparisonChart"></canvas>
         </div>
     </div>
 
+    <script>
+        // Variabel untuk jenjangChartInstance sudah dihapus
+        let allData = [];
+        let trendChartInstance, prodiComparisonChartInstance, universityComparisonChartInstance;
+        const PALETTE = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5'];
 
-</div>
+        function getValue(obj, key) { const kF = key.toLowerCase(); for (const k in obj) { if (k.toLowerCase() === kF) return obj[k]; } return undefined; }
+        function findKey(obj, key) { const kF = key.toLowerCase(); for (const k in obj) { if (k.toLowerCase() === kF) return k; } return undefined; }
 
-<script>
-let allData = [];
-let trendChartInstance, jenjangChartInstance;
-
-document.getElementById('file-input').addEventListener('change', handleFile);
-document.getElementById('ptn-filter').addEventListener('change', filterData);
-
-function handleFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    document.getElementById('file-name').textContent = `Memproses: ${file.name}`;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            allData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-            if (allData.length === 0) throw new Error("File Excel kosong.");
-            
-            // Tampilkan dashboard setelah file berhasil dibaca
-            document.getElementById('main-dashboard').style.display = 'block';
-            document.getElementById('table-card').style.display = 'block';
-
-            populatePtnFilter();
-            displayAllData();
-            createJenjangChart();
-
-        } catch (error) {
-            alert(`Gagal memproses file. Pastikan format header sudah benar (1 baris).\nError: ${error.message}`);
-            document.getElementById('file-name').textContent = 'Gagal memuat file. Silakan coba lagi.';
+        function getCleanProdiName(originalName) {
+            if (typeof originalName !== 'string') return originalName; const lowerName = originalName.toLowerCase();
+            if (lowerName.includes('kedokteran gigi') || lowerName.includes('pend. dokter gigi')) return 'Kedokteran Gigi'; if (lowerName.includes('pend. dokter') || lowerName.includes('kedokteran')) return 'Kedokteran'; if (lowerName.includes('farmasi')) return 'Farmasi'; if (lowerName.includes('kesehatan masyarakat')) return 'Kesehatan Masyarakat'; if (lowerName.includes('ilmu gizi') || lowerName.includes('gizi')) return 'Ilmu Gizi'; if (lowerName.includes('keperawatan') || lowerName.includes('ilmu keperawatan')) return 'Keperawatan'; if (lowerName.includes('kebidanan')) return 'Kebidanan'; if (lowerName.includes('teknik informatika') || lowerName.includes('informatika')) return 'Informatika'; if (lowerName.includes('ilmu komputer')) return 'Ilmu Komputer'; if (lowerName.includes('sistem informasi')) return 'Sistem Informasi'; if (lowerName.includes('teknologi informasi')) return 'Teknologi Informasi'; if (lowerName.includes('arsitektur')) return 'Arsitektur'; if (lowerName.includes('teknik sipil')) return 'Teknik Sipil'; if (lowerName.includes('teknik mesin')) return 'Teknik Mesin'; if (lowerName.includes('teknik elektro')) return 'Teknik Elektro'; if (lowerName.includes('teknik kimia')) return 'Teknik Kimia'; if (lowerName.includes('teknik industri')) return 'Teknik Industri'; if (lowerName.includes('teknik lingkungan')) return 'Teknik Lingkungan'; if (lowerName.includes('perencanaan wilayah') || lowerName.includes('planologi')) return 'Perencanaan Wilayah & Kota'; if (lowerName.includes('teknik perkapalan')) return 'Teknik Perkapalan'; if (lowerName.includes('teknik geologi')) return 'Teknik Geologi'; if (lowerName.includes('teknik geodesi')) return 'Teknik Geodesi'; if (lowerName.includes('hukum') || lowerName.includes('ilmu hukum')) return 'Hukum'; if (lowerName.includes('psikologi')) return 'Psikologi'; if (lowerName.includes('hubungan internasional')) return 'Hubungan Internasional'; if (lowerName.includes('ilmu komunikasi') || lowerName.includes('komunikasi')) return 'Ilmu Komunikasi'; if (lowerName.includes('administrasi negara') || lowerName.includes('administrasi publik')) return 'Administrasi Publik'; if (lowerName.includes('administrasi niaga') || lowerName.includes('administrasi bisnis')) return 'Administrasi Bisnis'; if (lowerName.includes('sosiologi')) return 'Sosiologi'; if (lowerName.includes('antropologi')) return 'Antropologi'; if (lowerName.includes('kriminologi')) return 'Kriminologi'; if (lowerName.includes('ilmu politik') || lowerName.includes('politik')) return 'Ilmu Politik'; if (lowerName.includes('kesejahteraan sosial')) return 'Kesejahteraan Sosial'; if (lowerName.includes('akuntansi')) return 'Akuntansi'; if (lowerName.includes('manajemen')) return 'Manajemen'; if (lowerName.includes('ekonomi pembangunan') || lowerName.includes('ilmu ekonomi')) return 'Ilmu Ekonomi'; if (lowerName.includes('bisnis digital')) return 'Bisnis Digital'; if (lowerName.includes('matematika')) return 'Matematika'; if (lowerName.includes('fisika')) return 'Fisika'; if (lowerName.includes('kimia')) return 'Kimia'; if (lowerName.includes('biologi')) return 'Biologi'; if (lowerName.includes('statistika')) return 'Statistika'; if (lowerName.includes('geofisika')) return 'Geofisika'; if (lowerName.includes('agribisnis')) return 'Agribisnis'; if (lowerName.includes('agroekoteknologi')) return 'Agroekoteknologi'; if (lowerName.includes('ilmu tanah')) return 'Ilmu Tanah'; if (lowerName.includes('kehutanan')) return 'Kehutanan'; return originalName;
         }
-    };
-    reader.readAsArrayBuffer(file);
-}
 
-function populatePtnFilter() {
-    const ptnFilter = document.getElementById('ptn-filter');
-    ptnFilter.innerHTML = '<option value="semua">Tampilkan Semua</option>';
-    const ptnSet = new Set(allData.map(item => item['Nama PTN']));
-    ptnSet.forEach(ptn => {
-        const option = document.createElement('option');
-        option.value = ptn;
-        option.textContent = ptn;
-        ptnFilter.appendChild(option);
-    });
-}
+        document.getElementById('file-input').addEventListener('change', handleFile);
+        document.getElementById('ptn-filter').addEventListener('change', filterData);
+        document.getElementById('prodi-chart-ptn-filter').addEventListener('change', updateProdiComparisonChart);
+        document.getElementById('metric-selector').addEventListener('change', updateProdiComparisonChart);
+        document.getElementById('year-selector').addEventListener('change', updateProdiComparisonChart);
+        document.getElementById('univ-metric-selector').addEventListener('change', updateUniversityComparisonChart);
+        document.getElementById('univ-year-selector').addEventListener('change', updateUniversityComparisonChart);
 
-function filterData() {
-    const selectedPtn = document.getElementById('ptn-filter').value;
-    if (selectedPtn === 'semua') {
-        displayAllData();
-    } else {
-        const filteredData = allData.filter(item => item['Nama PTN'] === selectedPtn);
-        populateTable(filteredData);
-    }
-}
+        function handleFile(event) {
+            const file = event.target.files[0]; if (!file) return;
+            document.getElementById('file-name').textContent = `Memproses: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    let rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    if (rawData.length === 0) throw new Error("File Excel kosong.");
+                    allData = rawData.map(row => { const prodiKey = findKey(row, 'Nama Prodi'); if (prodiKey) { row[prodiKey] = getCleanProdiName(row[prodiKey]); } return row; });
+                    document.querySelectorAll('.card').forEach(card => card.style.display = 'block');
+                    document.querySelector('.file-upload-container').parentElement.style.display = 'block';
+                    populatePtnFilters();
+                    displayAllData();
+                    // Panggilan ke createJenjangChart() dihapus
+                    updateProdiComparisonChart();
+                    updateUniversityComparisonChart();
+                } catch (error) { alert(`Gagal memproses file: ${error.message}`); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
 
-function displayAllData() {
-    populateTable(allData);
-}
-
-function populateTable(data) {
-    const tableContainer = document.getElementById('table-container');
-    if (data.length === 0) {
-        tableContainer.innerHTML = '<p>Tidak ada data untuk ditampilkan.</p>';
-        return;
-    }
-
-    // 1. Membuat header tabel secara dinamis dari nama kolom di Excel
-    const headers = Object.keys(data[0]);
-    let tableHTML = '<table id="data-table"><thead><tr>';
-    headers.forEach(header => {
-        tableHTML += `<th>${header}</th>`;
-    });
-    tableHTML += '</tr></thead><tbody>';
-
-    // 2. Mengisi setiap baris dan sel sesuai data
-    data.forEach((row) => {
-        // Menambahkan atribut data-row-index agar fungsi klik tetap bekerja
-        tableHTML += `<tr data-row-index="${allData.indexOf(row)}">`;
-        headers.forEach(header => {
-            const cellValue = row[header] !== undefined ? row[header] : '';
-            tableHTML += `<td>${cellValue}</td>`;
-        });
-        tableHTML += '</tr>';
-    });
-    tableHTML += '</tbody></table>';
-    tableContainer.innerHTML = tableHTML;
-
-    // 3. Menambahkan kembali event listener untuk setiap baris
-    document.querySelectorAll('#data-table tbody tr').forEach(row => {
-        row.addEventListener('click', () => {
-            const rowIndex = row.getAttribute('data-row-index');
-            updateTrendChart(allData[rowIndex]);
-        });
-    });
-}
-
-function updateTrendChart(prodiData) {
-    document.getElementById('chart-placeholder').style.display = 'none';
-    document.getElementById('trendChart').style.display = 'block';
-    
-    const years = ['2020', '2021', '2022', '2023', '2024'];
-    const peminatData = years.map(year => prodiData[`Tahun ${year} Peminat`] || 0);
-    const tampungData = years.map(year => prodiData[`Tahun ${year} Daya Tampung`] || 0);
-
-    if (trendChartInstance) {
-        trendChartInstance.destroy();
-    }
-
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    trendChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: years,
-            datasets: [
-                {
-                    label: 'Peminat',
-                    data: peminatData,
-                    borderColor: '#1877f2',
-                    backgroundColor: 'rgba(24, 119, 242, 0.1)',
-                    fill: true,
-                    tension: 0.1
-                },
-                {
-                    label: 'Daya Tampung',
-                    data: tampungData,
-                    borderColor: '#34a853',
-                    backgroundColor: 'rgba(52, 168, 83, 0.1)',
-                    fill: true,
-                    tension: 0.1
+        function populatePtnFilters() {
+            const mainPtnFilter = document.getElementById('ptn-filter');
+            const chartPtnFilter = document.getElementById('prodi-chart-ptn-filter');
+            mainPtnFilter.innerHTML = '<option value="semua">Tampilkan Semua Universitas</option>';
+            chartPtnFilter.innerHTML = '<option value="" disabled selected>-- Pilih Universitas --</option>';
+            const ptnSet = new Set(allData.map(item => getValue(item, 'Nama PTN')).filter(Boolean));
+            ptnSet.forEach(ptn => { mainPtnFilter.appendChild(new Option(ptn, ptn)); chartPtnFilter.appendChild(new Option(ptn, ptn)); });
+        }
+        function filterData() { const selectedPtn = document.getElementById('ptn-filter').value; populateTable((selectedPtn === 'semua') ? allData : allData.filter(item => getValue(item, 'Nama PTN') === selectedPtn)); }
+        function displayAllData() { populateTable(allData); }
+        function populateTable(data) {
+            const tableContainer = document.getElementById('table-container');
+            if (data.length === 0) { tableContainer.innerHTML = '<p>Tidak ada data.</p>'; return; }
+            const headers = Object.keys(data[0]); let tableHTML = '<table id="data-table"><thead><tr>';
+            headers.forEach(h => tableHTML += `<th>${h}</th>`);
+            tableHTML += '</tr></thead><tbody>';
+            data.forEach(row => {
+                tableHTML += `<tr data-row-index="${allData.indexOf(row)}">`;
+                headers.forEach(h => tableHTML += `<td>${row[h] !== undefined ? row[h] : ''}</td>`);
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+            tableContainer.innerHTML = tableHTML;
+            document.querySelectorAll('#data-table tbody tr').forEach(row => row.addEventListener('click', () => updateTrendChart(allData[row.dataset.rowIndex])));
+        }
+        function updateProdiComparisonChart() {
+            const selectedPtn = document.getElementById('prodi-chart-ptn-filter').value;
+            const selectedMetric = document.getElementById('metric-selector').value;
+            const selectedYear = document.getElementById('year-selector').value;
+            const yearSelectorContainer = document.getElementById('year-selector-container');
+            const chartCanvas = document.getElementById('prodiComparisonChart');
+            const placeholder = document.getElementById('prodi-chart-placeholder');
+            yearSelectorContainer.style.display = (selectedMetric !== 'total_peminat') ? 'flex' : 'none';
+            if (prodiComparisonChartInstance) prodiComparisonChartInstance.destroy();
+            if (!selectedPtn) { chartCanvas.style.display = 'none'; placeholder.style.display = 'block'; return; }
+            chartCanvas.style.display = 'block'; placeholder.style.display = 'none';
+            const prodiInPtn = allData.filter(item => getValue(item, 'Nama PTN') === selectedPtn);
+            let chartTitle = '', datasetLabel = '';
+            const prodiData = prodiInPtn.map(prodi => {
+                let value;
+                switch (selectedMetric) {
+                    case 'total_peminat': value = ['2020', '2021', '2022', '2023', '2024'].reduce((sum, year) => sum + (getValue(prodi, `Tahun ${year} Peminat`) || 0), 0); chartTitle = `Total Peminat di ${selectedPtn}`; datasetLabel = 'Total Peminat'; break;
+                    case 'peminat_per_tahun': value = getValue(prodi, `Tahun ${selectedYear} Peminat`) || 0; chartTitle = `Peminat ${selectedYear} di ${selectedPtn}`; datasetLabel = `Peminat ${selectedYear}`; break;
+                    case 'keketatan': value = getValue(prodi, `Tahun ${selectedYear} Rasio Keketatan`) || 0; chartTitle = `Keketatan ${selectedYear} di ${selectedPtn}`; datasetLabel = `Keketatan ${selectedYear}`; break;
                 }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: `Tren Prodi:  ${prodiData['Nama PTN']} - ${prodiData['Nama Prodi']}`, font: { size: 16 } },
-                legend: { position: 'top' }
-            },
-            scales: { y: { beginAtZero: true } }
+                return { name: getValue(prodi, 'Nama Prodi'), value: value };
+            });
+            prodiData.sort(selectedMetric === 'keketatan' ? (a, b) => a.value - b.value : (a, b) => b.value - a.value);
+            const ctx = chartCanvas.getContext('2d');
+            prodiComparisonChartInstance = new Chart(ctx, { type: 'bar', data: { labels: prodiData.map(d => d.name), datasets: [{ label: datasetLabel, data: prodiData.map(d => d.value), backgroundColor: 'rgba(24, 119, 242, 0.8)' }] }, options: { indexAxis: 'y', responsive: true, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: false } }, scales: { x: { beginAtZero: true } } } });
         }
-    });
-}
-
-function createJenjangChart() {
-    const jenjangCounts = {};
-    allData.forEach(row => {
-        const jenjang = row['Jenjang'] || 'Lainnya';
-        jenjangCounts[jenjang] = (jenjangCounts[jenjang] || 0) + 1;
-    });
-
-    if (jenjangChartInstance) {
-        jenjangChartInstance.destroy();
-    }
-    
-    const ctx = document.getElementById('jenjangChart').getContext('2d');
-    jenjangChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(jenjangCounts),
-            datasets: [{
-                label: 'Jumlah Prodi',
-                data: Object.values(jenjangCounts),
-                backgroundColor: ['#1877f2', '#34a853', '#fbbc05', '#ea4335', '#6c757d'],
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            }
+        function updateTrendChart(prodiData) {
+            const chartCanvas = document.getElementById('trendChart');
+            const placeholder = document.getElementById('chart-placeholder');
+            if (!prodiData) { chartCanvas.style.display = 'none'; placeholder.style.display = 'block'; return; }
+            chartCanvas.style.display = 'block'; placeholder.style.display = 'none';
+            if (trendChartInstance) trendChartInstance.destroy();
+            const years = ['2020', '2021', '2022', '2023', '2024'];
+            const peminatData = years.map(y => getValue(prodiData, `Tahun ${y} Peminat`) || 0);
+            const tampungData = years.map(y => getValue(prodiData, `Tahun ${y} Daya Tampung`) || 0);
+            const ctx = chartCanvas.getContext('2d');
+            trendChartInstance = new Chart(ctx, { type: 'line', data: { labels: years, datasets: [{ label: 'Peminat', data: peminatData, borderColor: '#1877f2', fill: true }, { label: 'Daya Tampung', data: tampungData, borderColor: '#34a853', fill: true }] }, options: { responsive: true, plugins: { title: { display: true, text: `Tren: ${getValue(prodiData, 'Nama Prodi')} - ${getValue(prodiData, 'Nama PTN')}`, font: { size: 16 } }, legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } } });
         }
-    });
-}
-</script>
+
+        // Fungsi createJenjangChart() sudah dihapus
+
+        function updateUniversityComparisonChart() {
+            const metric = document.getElementById('univ-metric-selector').value;
+            const year = document.getElementById('univ-year-selector').value;
+            const yearSelector = document.getElementById('univ-year-selector-container');
+            yearSelector.style.display = (metric !== 'total_peminat') ? 'flex' : 'none';
+            const prodiTotals = {};
+            allData.forEach(row => {
+                const prodiName = getValue(row, 'Nama Prodi');
+                if (!prodiName) return;
+                let value;
+                if (metric === 'total_peminat') value = ['2020', '2021', '2022', '2023', '2024'].reduce((sum, y) => sum + (getValue(row, `Tahun ${y} Peminat`) || 0), 0);
+                else if (metric === 'peminat_per_tahun') value = getValue(row, `Tahun ${year} Peminat`) || 0;
+                else if (metric === 'keketatan') value = getValue(row, `Tahun ${year} Rasio Keketatan`) || 0;
+                prodiTotals[prodiName] = (prodiTotals[prodiName] || 0) + value;
+            });
+            const primarySortOrder = metric === 'keketatan' ? ([, a], [, b]) => a - b : ([, a], [, b]) => b - a;
+            const top10Entries = Object.entries(prodiTotals).sort(primarySortOrder).slice(0, 10);
+            top10Entries.sort(([, a], [, b]) => a - b);
+            const top10ProdiLabels = top10Entries.map(entry => entry[0]);
+            const univs = [...new Set(allData.map(row => getValue(row, 'Nama PTN')).filter(Boolean))];
+            const datasets = [];
+            univs.forEach((univName, index) => {
+                const dataset = { label: univName, data: [], backgroundColor: PALETTE[index % PALETTE.length] };
+                top10ProdiLabels.forEach(prodiLabel => {
+                    const row = allData.find(r => getValue(r, 'Nama PTN') === univName && getValue(r, 'Nama Prodi') === prodiLabel);
+                    let value = 0;
+                    if (row) {
+                        if (metric === 'total_peminat') value = ['2020', '2021', '2022', '2023', '2024'].reduce((sum, y) => sum + (getValue(row, `Tahun ${y} Peminat`) || 0), 0);
+                        else if (metric === 'peminat_per_tahun') value = getValue(row, `Tahun ${year} Peminat`) || 0;
+                        else if (metric === 'keketatan') value = getValue(row, `Tahun ${year} Rasio Keketatan`) || 0;
+                    }
+                    dataset.data.push(value);
+                });
+                datasets.push(dataset);
+            });
+            if (universityComparisonChartInstance) universityComparisonChartInstance.destroy();
+            const ctx = document.getElementById('universityComparisonChart').getContext('2d');
+            let chartTitle = '';
+            if (metric === 'total_peminat') chartTitle = `Perbandingan Total Peminat (2020-2024) untuk Top 10 Prodi`;
+            else if (metric === 'peminat_per_tahun') chartTitle = `Perbandingan Peminat Tahun ${year} untuk Top 10 Prodi`;
+            else chartTitle = `Perbandingan Tingkat Keketatan ${year} untuk Top 10 Prodi`;
+            universityComparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: top10ProdiLabels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, tooltip: { mode: 'index', intersect: false }, legend: { position: 'top' } },
+                    scales: { x: { stacked: false }, y: { stacked: false, beginAtZero: true } }
+                }
+            });
+        }
+    </script>
 </body>
+
 </html>
