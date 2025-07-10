@@ -8,4 +8,4 @@
 4. **Ivan Adhipradana Putera - 181221052**
 
 ## NOTE
-Untuk dataset gunakan `DATASET VINIX.xlsx` yang sudah disediakan
+Untuk dataset gunakan `Dataset VINIX.xlsx` yang sudah disediakan
